@@ -9,7 +9,6 @@ const taskSlice = createSlice({
 	initialState,
 	reducers: {
 		recived(state, action) {
-			console.log(action.payload)
 			state.entities = action.payload
 			state.isLoading = false
 		},
@@ -35,7 +34,6 @@ const taskSlice = createSlice({
 		},
 		tasksCreate(state, action) {
 			state.entities = [...state.entities, action.payload]
-			console.log(action.payload)
 		}
 	}
 })
