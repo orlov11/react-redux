@@ -1,27 +1,47 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { taskCopmpleted, titleChange, taskDelet } from './store/action'
-import { initateStore } from './store/store'
+import {
+	titleChange,
+	taskDelet,
+	copmpletedTask,
+	getTask,
+	loadTask,
+	getTaskIsLoading,
+	taskCreate
+} from './store/task'
+import configureStore from './store/store'
+import { Provider, useSelector, useDispatch } from 'react-redux'
+import { getError } from './store/error'
 
-const store = initateStore()
+const store = configureStore()
+
 const App = () => {
-	const [state, setState] = useState(store.getState())
+	const state = useSelector(getTask())
+	const dispatch = useDispatch()
+	const isLoading = useSelector(getTaskIsLoading())
+	const error = useSelector(getError())
 
 	useEffect(() => {
-		store.subscribe(() => {
-			setState(store.getState())
-		})
+		dispatch(loadTask())
 	}, [])
 
-	const completeTask = id => {
-		store.dispatch(taskCopmpleted(id))
-	}
 	const chageTitle = id => {
-		store.dispatch(titleChange(id))
+		dispatch(titleChange(id))
 	}
 
 	const deleteTask = id => {
-		store.dispatch(taskDelet(id))
+		dispatch(taskDelet(id))
+	}
+	const createTask = () => {
+		const titleTask = prompt(`Введите название новой задачи:`)
+		dispatch(taskCreate({ title: titleTask, completed: true }))
+	}
+
+	if (isLoading) {
+		return <h1>Loading...</h1>
+	}
+	if (error) {
+		return <h2>{error}, sorry :(</h2>
 	}
 	return (
 		<>
@@ -31,7 +51,7 @@ const App = () => {
 					<li key={item.id}>
 						<p>{item.title}</p>
 						<p>{`Complleted: ${item.completed}`}</p>
-						<button onClick={() => completeTask(item.id)}>
+						<button onClick={() => dispatch(copmpletedTask(item.id))}>
 							Complete
 						</button>
 						<button onClick={() => chageTitle(item.id)}>
@@ -43,6 +63,7 @@ const App = () => {
 						<hr />
 					</li>
 				))}
+				<button onClick={createTask}>Create task</button>
 			</ul>
 		</>
 	)
@@ -51,6 +72,8 @@ const App = () => {
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
 	<React.StrictMode>
-		<App />
+		<Provider store={store}>
+			<App />
+		</Provider>
 	</React.StrictMode>
 )
